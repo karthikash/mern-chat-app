@@ -1,0 +1,50 @@
+{
+  "name": "mern-chat-app",
+  "version": "1.0.0",
+  "description": "Chat web application built using MERN Stack",
+  "private": true,
+  "main": "app.js",
+  "engines": {
+    "node": "^14.15.1",
+    "npm": "^6.14.8",
+    "vscode": "^1.22.0"
+  },
+  "scripts": {
+    "test": "mocha --timeout 10000",
+    "start": "node app.js",
+    "server": "nodemon app.js",
+    "client": "npm run start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "author": "Karthik Ashokkumar <karthikashokumar@gmail.com>",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kpenhanced/mern-chat-app.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kpenhanced/mern-chat-app/issues"
+  },
+  "homepage": "https://github.com/kpenhanced/mern-chat-app#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "helmet": "^4.2.0",
+    "joi": "^17.3.0",
+    "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.1",
+    "mongoose": "^5.11.8",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.2",
+    "redis": "^3.0.2",
+    "winston": "^3.3.3"
+  },
+  "devDependencies": {
+    "concurrently": "^5.3.0",
+    "nodemon": "^2.0.6"
+  }
+}
