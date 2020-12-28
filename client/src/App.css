@@ -9,7 +9,7 @@ body {
 }
 
 .edit-profile-card {
-	height: 440px;
+	height: 500px;
 }
 
 .chat-card {
@@ -22,6 +22,16 @@ body {
 	-webkit-overflow-scrolling: touch;
 }
 
-.scroll::-webkit-scrollbar { 
-    display: none; 
+.scroll::-webkit-scrollbar {
+	display: none;
+}
+
+.chat-form {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	justify-content: center;
+	padding-left: 20px;
+	padding-right: 40px;
 }
