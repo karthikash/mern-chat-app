@@ -18,6 +18,7 @@ const { logger, constants, mongoConnection, appConfig, redis } = require('./conf
 // app instance from express framework
 const app = express();
 const httpServer = http.createServer(app);
+const io = require('socket.io')(httpServer);
 
 // global middleware for app instance
 appConfig(app);

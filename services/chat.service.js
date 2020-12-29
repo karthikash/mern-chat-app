@@ -1,3 +1,4 @@
+const { isValidObjectId } = require('mongoose');
 const { Chat, User } = require('../models');
 
 class ChatService {
@@ -12,6 +13,20 @@ class ChatService {
         return this.res.status(201).json({ code: 201, message: 'message sent' });
     }
 
+    async sendMedia() {
+        const { oFrom } = this.req.body;
+        if (!isValidObjectId(oFrom)) return this.res.status(400).json({ status: 400, message: 'invalid ObjectId', error: 'Bad Request' });
+        if (!this.req.file) return this.res.status(400).json({ status: 400, message: 'upload file', error: 'Bad Request' });
+        const { filename } = this.req.file;
+        const user = await User.findOne({ _id: oFrom });
+        if (!user) return this.res.status(404).json({ status: 404, message: 'user not found', error: 'Not Found' });
+        const imageUrl = `http://${constants.HOST}:${constants.PORT}/uploads/${filename}`;
+        this.req.body.sMessage = imageUrl;
+        const message = new Chat(this.req.body);
+        message.save();
+        return this.res.status(201).json({ code: 201, message: 'message sent' });
+    }
+
     async fetchMessages() {
         const { sender, receiver } = this.req.query;
         const messages = await Chat
@@ -21,7 +36,7 @@ class ChatService {
             .populate({ path: 'oFrom', model: User, select: { sFirstName: 1 } })
             .select('oTo')
             .populate({ path: 'oTo', model: User, select: { sFirstName: 1 } })
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: 1 });
         if (messages.length === 0) return this.res.status(404).json({ status: 404, message: 'no chats found' });
         return this.res.status(200).json({ code: 200, message: 'chat list', data: messages });
     }
