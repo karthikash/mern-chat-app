@@ -13,12 +13,25 @@ require('dotenv').config();
 
 const http = require('http');
 const express = require('express');
+const socketio = require('socket.io');
 const { logger, constants, mongoConnection, appConfig, redis } = require('./config');
 
 // app instance from express framework
 const app = express();
 const httpServer = http.createServer(app);
-const io = require('socket.io')(httpServer);
+const io = socketio(httpServer, { cors: { origin: constants.CLIENT } });
+
+io.on('connection', socket => {
+    logger.debug(`user connected: ${socket.id} `);
+    socket.emit('socket.id', socket.id);
+    socket.on('new_text_message', (message) => {
+        logger.debug(`new_text_message: ${JSON.stringify(message)}`);
+        io.emit('refresh_messages', message.oTo);
+    });
+    socket.on('receiver', res => {
+        logger.debug(`receiver ${res}`);
+    });
+});
 
 // global middleware for app instance
 appConfig(app);

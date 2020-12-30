@@ -3,6 +3,7 @@ require('dotenv').config();
 const constants = {
     "dev": {
         NODE_ENV: process.env.NODE_ENV,
+        CLIENT: process.env.CLIENT,
         HOST: process.env.HOST,
         PORT: process.env.PORT,
         MONGO_DB_URL: process.env.MONGO_DB_URL,
