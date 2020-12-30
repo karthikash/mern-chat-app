@@ -10,6 +10,7 @@ const routes = require('../routes');
 const constants = require('./constants.config');
 const { json, urlencoded, } = require('body-parser');
 const publicDirectoryPath = path.join(__dirname, '../public');
+const buildDirectoryPath = path.join(__dirname, '../client/build');
 
 module.exports = (app) => {
 
@@ -31,6 +32,7 @@ module.exports = (app) => {
 
     // for serving static files
     app.use(express.static(publicDirectoryPath));
+    app.use(express.static(path.join(buildDirectoryPath)));
 
     // logs every request to the console
     morgan.token('date', () => { return moment().format('DD-MM-YYYY HH:mm:ss'); });
@@ -47,6 +49,17 @@ module.exports = (app) => {
 
     app.use(cors({ origin: true, credentials: true }));
 
+    app.get('/', (req, res) => {
+        return res.sendFile(path.join(__dirname, '../client/build/index.html'));
+    });
+
+    app.get('/health_check', (_req, res) => {
+        return res.status(200).json({
+            status: 200,
+            message: 'Server health check passed'
+        });
+    });
+
     app.use(`/${constants.API_VERSION}`, routes);
 
     app.use((_req, res, _next) => {
@@ -55,13 +68,6 @@ module.exports = (app) => {
         return res.send({
             status: err.status,
             message: err.message
-        });
-    });
-
-    app.get('/health_check', (_req, res) => {
-        return res.status(200).json({
-            status: 200,
-            message: 'Server health check passed'
         });
     });
 }
