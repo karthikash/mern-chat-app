@@ -1,0 +1,24 @@
+{
+  "files": {
+    "main.css": "/mern-chat-app/static/css/main.6e26dc10.chunk.css",
+    "main.js": "/mern-chat-app/static/js/main.eb16e187.chunk.js",
+    "main.js.map": "/mern-chat-app/static/js/main.eb16e187.chunk.js.map",
+    "runtime-main.js": "/mern-chat-app/static/js/runtime-main.4df76314.js",
+    "runtime-main.js.map": "/mern-chat-app/static/js/runtime-main.4df76314.js.map",
+    "static/css/2.20676a07.chunk.css": "/mern-chat-app/static/css/2.20676a07.chunk.css",
+    "static/js/2.c2b229ca.chunk.js": "/mern-chat-app/static/js/2.c2b229ca.chunk.js",
+    "static/js/2.c2b229ca.chunk.js.map": "/mern-chat-app/static/js/2.c2b229ca.chunk.js.map",
+    "index.html": "/mern-chat-app/index.html",
+    "static/css/2.20676a07.chunk.css.map": "/mern-chat-app/static/css/2.20676a07.chunk.css.map",
+    "static/css/main.6e26dc10.chunk.css.map": "/mern-chat-app/static/css/main.6e26dc10.chunk.css.map",
+    "static/js/2.c2b229ca.chunk.js.LICENSE.txt": "/mern-chat-app/static/js/2.c2b229ca.chunk.js.LICENSE.txt",
+    "static/media/font-awesome.min.css": "/mern-chat-app/static/media/fontawesome-webfont.f691f37e.woff"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.4df76314.js",
+    "static/css/2.20676a07.chunk.css",
+    "static/js/2.c2b229ca.chunk.js",
+    "static/css/main.6e26dc10.chunk.css",
+    "static/js/main.eb16e187.chunk.js"
+  ]
+}
