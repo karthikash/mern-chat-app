@@ -14,7 +14,7 @@ require('dotenv').config();
 const http = require('http');
 const express = require('express');
 const socketio = require('socket.io');
-const { logger, constants, mongoConnection, appConfig, redis } = require('./config');
+const { logger, constants, mongoConnection, appConfig } = require('./config');
 
 // app instance from express framework
 const app = express();
@@ -49,5 +49,4 @@ mongoConnection((err) => {
     // initializing global variables
     global.logger = logger;
     global.constants = constants;
-    global.redisClient = redis.createConnection();
 });

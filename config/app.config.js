@@ -8,7 +8,6 @@ const moment = require('moment');
 const express = require('express');
 const routes = require('../routes');
 const constants = require('./constants.config');
-const cookieParser = require('cookie-parser');
 const { json, urlencoded, } = require('body-parser');
 const publicDirectoryPath = path.join(__dirname, '../public');
 
@@ -47,9 +46,6 @@ module.exports = (app) => {
     });
 
     app.use(cors({ origin: true, credentials: true }));
-
-    // for storing signed and unsigned cookies
-    app.use(cookieParser());
 
     app.use(`/${constants.API_VERSION}`, routes);
 

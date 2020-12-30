@@ -40,15 +40,12 @@ class AuthService {
         }
         const { _id } = user;
         const token = this.signToken({ _id });
-        redisClient.HMSET(_id.toString(), { token });
         return this.res.status(200).json({ status: 200, message: 'Login Success', token, _id });
     }
 
     signOut() {
         const { _id } = this.req.params;
         if (!isValidObjectId(_id)) return this.res.status(400).json({ status: 400, message: 'invalid ObjectId', error: 'Bad Request' });
-        this.res.clearCookie('token');
-        redisClient.DEL(_id.toString());
         return this.res.status(200).json({ status: 200, message: 'sign out success' });
     }
 
