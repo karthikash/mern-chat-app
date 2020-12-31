@@ -46,9 +46,9 @@ class App extends Component {
 						</Col>
 					</Row>
 					<Router>
-						<Route path="/chat" component={Chat} />
-						<Route path="/profile" component={Profile} />
-						<Route path="/reset" component={ResetPassword}></Route>
+						<Route path="mern-chat-app/chat" component={Chat} />
+						<Route path="mern-chat-app/profile" component={Profile} />
+						<Route path="mern-chat-app/reset" component={ResetPassword}></Route>
 					</Router>
 					<Row>
 						<Col>

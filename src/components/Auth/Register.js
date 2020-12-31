@@ -51,7 +51,7 @@ class Register extends Component {
         if (data.sPassword.length < 8) errors.sPassword = 'Password must be atleast 8 characters.'
         if (data.sPassword === '') errors.sPassword = 'Password cannot be empty.';
         if (data.sPassword !== data.sConfirmPassword) errors.sConfirmPassword = `Passwords doesn't match.`;
-        if (data.sConfirmPassword.length < 8) errors.sConfirmPassword.sPassword = 'Password must be atleast 8 characters.'
+        if (data.sConfirmPassword.length < 8) errors.sConfirmPassword = 'Password must be atleast 8 characters.'
         if (data.sConfirmPassword === '') errors.sConfirmPassword = 'Password cannot be empty.';
         return errors;
     }
