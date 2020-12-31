@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/mern-chat-app/static/css/main.af7ea6f8.chunk.css",
-    "main.js": "/mern-chat-app/static/js/main.ab31d717.chunk.js",
-    "main.js.map": "/mern-chat-app/static/js/main.ab31d717.chunk.js.map",
+    "main.js": "/mern-chat-app/static/js/main.2f860a23.chunk.js",
+    "main.js.map": "/mern-chat-app/static/js/main.2f860a23.chunk.js.map",
     "runtime-main.js": "/mern-chat-app/static/js/runtime-main.4df76314.js",
     "runtime-main.js.map": "/mern-chat-app/static/js/runtime-main.4df76314.js.map",
     "static/css/2.20676a07.chunk.css": "/mern-chat-app/static/css/2.20676a07.chunk.css",
@@ -19,6 +19,6 @@
     "static/css/2.20676a07.chunk.css",
     "static/js/2.4598983f.chunk.js",
     "static/css/main.af7ea6f8.chunk.css",
-    "static/js/main.ab31d717.chunk.js"
+    "static/js/main.2f860a23.chunk.js"
   ]
 }
