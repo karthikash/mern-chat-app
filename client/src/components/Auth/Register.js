@@ -51,7 +51,7 @@ class Register extends Component {
         if (data.sPassword.length < 8) errors.sPassword = 'Password must be atleast 8 characters.'
         if (data.sPassword === '') errors.sPassword = 'Password cannot be empty.';
         if (data.sPassword !== data.sConfirmPassword) errors.sConfirmPassword = `Passwords doesn't match.`;
-        if (data.sConfirmPassword.length < 8) errors.sConfirmPassword.sPassword = 'Password must be atleast 8 characters.'
+        if (data.sConfirmPassword.length < 8) errors.sConfirmPassword = 'Password must be atleast 8 characters.'
         if (data.sConfirmPassword === '') errors.sConfirmPassword = 'Password cannot be empty.';
         return errors;
     }
@@ -90,27 +90,27 @@ class Register extends Component {
             <Form onSubmit={this.handleSubmit}>
                 <FormGroup>
                     <Label for="sFirstName">First Name</Label>
-                    <Input id="sFirstName" name="sFirstName" invalid={errors.sFirstName ? true : false} onChange={this.handleChange} value={data.sFirstName} />
+                    <Input id="sFirstName" name="sFirstName" invalid={errors.sFirstName ? true : false} onChange={this.handleChange} value={data.sFirstName} autoComplete="off" />
                     <FormFeedback>{errors.sFirstName}</FormFeedback>
                 </FormGroup>
                 <FormGroup>
                     <Label for="sLastName">Last Name</Label>
-                    <Input id="sLastName" name="sLastName" invalid={errors.sLastName ? true : false} onChange={this.handleChange} value={data.sLastName} />
+                    <Input id="sLastName" name="sLastName" invalid={errors.sLastName ? true : false} onChange={this.handleChange} value={data.sLastName} autoComplete="off" />
                     <FormFeedback>{errors.sLastName}</FormFeedback>
                 </FormGroup>
                 <FormGroup>
                     <Label for="sUsername">Username</Label>
-                    <Input id="sUsername" name="sUsername" invalid={errors.sUsername ? true : false} onChange={this.handleChange} value={data.sUsername} />
+                    <Input id="sUsername" name="sUsername" invalid={errors.sUsername ? true : false} onChange={this.handleChange} value={data.sUsername} autoComplete="off" />
                     <FormFeedback>{errors.sUsername}</FormFeedback>
                 </FormGroup>
                 <FormGroup>
                     <Label for="sPassword">Password</Label>
-                    <Input id="sPassword" name="sPassword" type="password" invalid={errors.sPassword ? true : false} onChange={this.handleChange} value={data.sPassword} />
+                    <Input id="sPassword" name="sPassword" type="password" invalid={errors.sPassword ? true : false} onChange={this.handleChange} value={data.sPassword} autoComplete="off" />
                     <FormFeedback>{errors.sPassword}</FormFeedback>
                 </FormGroup>
                 <FormGroup>
                     <Label for="sConfirmPassword">Confirm Password</Label>
-                    <Input id="sConfirmPassword" name="sConfirmPassword" type="password" invalid={errors.sConfirmPassword ? true : false} onChange={this.handleChange} value={data.sConfirmPassword} />
+                    <Input id="sConfirmPassword" name="sConfirmPassword" type="password" invalid={errors.sConfirmPassword ? true : false} onChange={this.handleChange} value={data.sConfirmPassword} autoComplete="off" />
                     <FormFeedback>{errors.sConfirmPassword}</FormFeedback>
                 </FormGroup>
                 <FormGroup>

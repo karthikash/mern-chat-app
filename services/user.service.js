@@ -58,7 +58,7 @@ class UserService {
         const { filename } = this.req.file;
         const user = await User.findOne({ _id });
         if (!user) return this.res.status(404).json({ status: 404, message: 'user not found', error: 'Not Found' });
-        const imageUrl = `http://${constants.HOST}:${constants.PORT}/uploads/${filename}`;
+        const imageUrl = `${constants.HOST}:${constants.PORT}/uploads/${filename}`;
         await User.updateOne({ _id }, { $set: { sImage: imageUrl } }, { new: true }).exec();
         return this.res.status(200).json({ status: 200, message: 'user dp uploaded' });
     }

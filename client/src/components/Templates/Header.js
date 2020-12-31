@@ -33,6 +33,7 @@ class Header extends Component {
             .then(() => {
                 localStorage.removeItem('_id');
                 localStorage.removeItem('token');
+                localStorage.removeItem('dp');
                 window.location.reload();
             })
             .catch((error) => {

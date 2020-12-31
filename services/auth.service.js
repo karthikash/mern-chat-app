@@ -33,14 +33,14 @@ class AuthService {
 
     async signIn() {
         const { sUsername, sPassword } = this.req.body;
-        const user = await User.findOne({ sUsername }, { sPassword: 1, sSalt: 1 });
+        const user = await User.findOne({ sUsername }, { sPassword: 1, sSalt: 1, sImage: 1 });
         if (!user) return this.res.status(404).json({ status: 404, message: `User not Registered`, error: 'Not Found' });
         if (user.sPassword !== await this.hashPassword(sPassword, user.sSalt)) {
             return this.res.status(401).json({ status: 401, message: 'Incorrect Password', error: 'Unauthorized' });
         }
-        const { _id } = user;
+        const { _id, sImage } = user;
         const token = this.signToken({ _id });
-        return this.res.status(200).json({ status: 200, message: 'Login Success', token, _id });
+        return this.res.status(200).json({ status: 200, message: 'Login Success', token, _id, sImage });
     }
 
     signOut() {

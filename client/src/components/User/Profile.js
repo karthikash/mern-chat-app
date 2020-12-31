@@ -46,7 +46,7 @@ class Profile extends Component {
                 [e.target.name]: ''
             },
             files: {
-                dp: e.target.files[0]
+                dp: e.target.files
             }
         });
         //if (e.target.files[0]) {
@@ -129,7 +129,7 @@ class Profile extends Component {
         const token = localStorage.getItem('token');
         const data = new FormData();
         data.append('_id', _id);
-        data.append('dp', files.dp);
+        data.append('dp', files.dp[0]);
         const httpHeaders = {
             'Authorization': `Bearer ${token}`
         }
@@ -194,17 +194,17 @@ class Profile extends Component {
                                 <Form onSubmit={this.handleSubmit}>
                                     <FormGroup>
                                         <Label for="sFirstName">First Name</Label>
-                                        <Input id="sFirstName" name="sFirstName" invalid={errors.sFirstName ? true : false} onChange={this.handleChange} value={user.sFirstName} />
+                                        <Input id="sFirstName" name="sFirstName" invalid={errors.sFirstName ? true : false} onChange={this.handleChange} value={user.sFirstName} autoComplete="off" />
                                         <FormFeedback></FormFeedback>
                                     </FormGroup>
                                     <FormGroup>
                                         <Label for="sLastName">Last Name</Label>
-                                        <Input id="sLastName" name="sLastName" invalid={errors.sLastName ? true : false} onChange={this.handleChange} value={user.sLastName} />
+                                        <Input id="sLastName" name="sLastName" invalid={errors.sLastName ? true : false} onChange={this.handleChange} value={user.sLastName} autoComplete="off" />
                                         <FormFeedback></FormFeedback>
                                     </FormGroup>
                                     <FormGroup>
                                         <Label for="sUsername">Username</Label>
-                                        <Input id="sUsername" name="sUsername" invalid={errors.sUsername ? true : false} onChange={this.handleChange} value={user.sUsername} />
+                                        <Input id="sUsername" name="sUsername" invalid={errors.sUsername ? true : false} onChange={this.handleChange} value={user.sUsername} autoComplete="off" />
                                         <FormFeedback></FormFeedback>
                                     </FormGroup>
                                     <FormGroup>

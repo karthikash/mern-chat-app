@@ -252,22 +252,26 @@ class Chat extends Component {
     render() {
         const { activeIndex, name, dp, lastseen } = this.state.selectedUser;
         const { chat, messages, userList } = this.state;
-        const users = userList.map((user, index) => {
-            const className = activeIndex === index ? 'active' : '';
-            return <ListGroupItem className={className} key={user._id} onClick={this.isActive.bind(this, index, user)}>
-                <Row>
-                    <Col md="3">
-                        <span className="pull-left">
-                            <Media className="dp" src={user.sImage} />
-                        </span>
-                    </Col>
-                    <Col md="9">
-                        {`${user.sFirstName} ${user.sLastName}`}<br />
-                        <em style={{ color: "black" }}>{`@${user.sUsername}`}</em>
-                    </Col>
-                </Row>
-            </ListGroupItem>
-        });
+        const users = (userList && userList.length > 0 ?
+            userList.map((user, index) => {
+                const className = activeIndex === index ? 'active' : '';
+                return <ListGroupItem className={className} key={user._id} onClick={this.isActive.bind(this, index, user)}>
+                    <Row>
+                        <Col md="3">
+                            <span className="pull-left">
+                                <Media className="dp" src={user.sImage} />
+                            </span>
+                        </Col>
+                        <Col md="9">
+                            {`${user.sFirstName} ${user.sLastName}`}<br />
+                            <em style={{ color: "black" }}>{`@${user.sUsername}`}</em>
+                        </Col>
+                    </Row>
+                </ListGroupItem>
+            })
+            :
+            null
+        );
         return (
             <div>
                 <Row>
@@ -276,7 +280,7 @@ class Chat extends Component {
                             <CardBody>
                                 <CardSubtitle tag="h5" className="mb-2 text-muted">Users</CardSubtitle>
                                 <br />
-                                <ListGroup className="scroll">{users}</ListGroup>
+                                <ListGroup className="scroll">{users ? users : null}</ListGroup>
                             </CardBody>
                         </Card>
                     </Col>
@@ -316,7 +320,7 @@ class Chat extends Component {
                                                         <Col md="6" style={{ textAlign: "end" }}>
                                                             {message.sMessage.includes('http://') ?
                                                                 (message.sMessage.includes('.mp4') ?
-                                                                    <video src={message.sMessage} height="100%" width="100%" style={{padding: "8px"}} controls autoPlay muted></video>
+                                                                    <video src={message.sMessage} height="100%" width="100%" style={{ padding: "8px" }} controls autoPlay muted></video>
                                                                     :
                                                                     <img src={message.sMessage} height="100%" width="100%" alt="" style={{ borderRadius: "10px", padding: "8px" }}></img>
                                                                 )
@@ -333,7 +337,7 @@ class Chat extends Component {
                                                         <Col md="6" style={{ textAlign: "start" }}>
                                                             {message.sMessage.includes('http://') ?
                                                                 (message.sMessage.includes('.mp4') ?
-                                                                    <video src={message.sMessage} height="100%" width="100%" style={{padding: "8px"}} controls autoPlay muted></video>
+                                                                    <video src={message.sMessage} height="100%" width="100%" style={{ padding: "8px" }} controls autoPlay muted></video>
                                                                     :
                                                                     <img src={message.sMessage} height="100%" width="100%" alt="" style={{ borderRadius: "10px", padding: "8px" }}></img>
                                                                 )

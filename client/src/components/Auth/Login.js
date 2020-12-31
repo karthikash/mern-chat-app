@@ -66,6 +66,7 @@ class Login extends Component {
                     if (response.status === 200) {
                         localStorage.setItem('_id', response._id);
                         localStorage.setItem('token', response.token);
+                        localStorage.setItem('dp', response.sImage);
                         return window.location.assign('/chat');
                     }
                 })
@@ -84,12 +85,12 @@ class Login extends Component {
             <Form onSubmit={this.handleSubmit}>
                 <FormGroup>
                     <Label for="sUsername">Username</Label>
-                    <Input id="sUsername" name="sUsername" invalid={errors.sUsername ? true : false} onChange={this.handleChange} value={data.sUsername} />
+                    <Input id="sUsername" name="sUsername" invalid={errors.sUsername ? true : false} onChange={this.handleChange} value={data.sUsername} autoComplete="off" />
                     <FormFeedback>{errors.sUsername}</FormFeedback>
                 </FormGroup>
                 <FormGroup>
                     <Label for="sPassword">Password</Label>
-                    <Input id="sPassword" name="sPassword" type="password" invalid={errors.sPassword ? true : false} onChange={this.handleChange} value={data.sPassword} />
+                    <Input id="sPassword" name="sPassword" type="password" invalid={errors.sPassword ? true : false} onChange={this.handleChange} value={data.sPassword} autoComplete="off" />
                     <FormFeedback>{errors.sPassword}</FormFeedback>
                 </FormGroup>
                 <FormGroup>
