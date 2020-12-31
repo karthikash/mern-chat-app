@@ -11,6 +11,7 @@
 
 require('dotenv').config();
 
+const fs = require('fs');
 const http = require('http');
 const express = require('express');
 const socketio = require('socket.io');
@@ -20,6 +21,17 @@ const { logger, constants, mongoConnection, appConfig } = require('./config');
 const app = express();
 const httpServer = http.createServer(app);
 const io = socketio(httpServer, { cors: { origin: constants.CLIENT } });
+
+const publicPath = './public';
+const uploadPath = './public/uploads';
+
+if (!fs.existsSync(publicPath)) {
+    fs.mkdirSync(publicPath);
+}
+
+if (!fs.existsSync(uploadPath)) {
+    fs.mkdirSync(uploadPath);
+}
 
 io.on('connection', socket => {
     logger.debug(`user connected: ${socket.id} `);
