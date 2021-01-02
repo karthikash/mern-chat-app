@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const { MONGO_CONFIG } = require('./constants.config');
+const { MONGO_CONFIG, MONGO_DB_URL } = require('./constants.config');
 
 module.exports = (cb) => {
     const options = {
@@ -11,8 +11,8 @@ module.exports = (cb) => {
         useCreateIndex: true,
         useFindAndModify: false
     };
-    const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = MONGO_CONFIG;
-    mongoose.connection.openUri(`mongodb+srv://${DB_USER}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}?retryWrites=true&w=majority`, options, (err) => {
+    //const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = MONGO_CONFIG;
+    mongoose.connection.openUri(MONGO_DB_URL, options, (err) => {
         if (err) {
             cb(err);
         }

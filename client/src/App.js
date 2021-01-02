@@ -2,7 +2,7 @@ import './App.css';
 import { Component } from 'react';
 import { Auth, Header, Footer, Chat, Profile, ResetPassword } from './components';
 import { Container, Col, Row } from 'reactstrap';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { verify } from 'jsonwebtoken';
 import { Constants } from './config';
 
@@ -46,9 +46,11 @@ class App extends Component {
 						</Col>
 					</Row>
 					<Router>
-						<Route path="/chat" component={Chat} />
-						<Route path="/profile" component={Profile} />
-						<Route path="/reset" component={ResetPassword}></Route>
+						<Switch>
+							<Route to="/chat" component={Chat} />
+							<Route to="/profile" component={Profile} />
+							<Route to="/reset" component={ResetPassword} />
+						</Switch>
 					</Router>
 					<Row>
 						<Col>

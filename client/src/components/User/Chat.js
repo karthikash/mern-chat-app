@@ -5,7 +5,7 @@ import $ from 'jquery';
 import moment from 'moment';
 import { io } from 'socket.io-client';
 
-const socket = io(Constants.REACT_APP_SOCKET);
+const socket = io('http://localhost:3001');
 
 class Chat extends Component {
 
@@ -48,7 +48,13 @@ class Chat extends Component {
         files: {
             media: ''
         },
-        messages: []
+        messages: [],
+        online_users: [],
+        typing: {
+            sender: '',
+            receiver: '',
+            status: ''
+        }
     });
 
     handleChange = (e) => {
@@ -70,8 +76,19 @@ class Chat extends Component {
 
     componentDidMount() {
         this.autoscroll();
+
+        const _id = localStorage.getItem('_id');
+
         this.socket.on('socket.id', (socketid) => {
+            this.socket.emit('join', { _id, socketid, room: 'chat-app' });
             localStorage.setItem('socketid', socketid);
+        });
+
+        this.socket.on('users_online', (data) => {
+            console.log('users_online: ', data);
+            this.setState({
+                online_users: data
+            });
         });
 
         this.socket.on('refresh_messages', receiverId => {
@@ -86,7 +103,31 @@ class Chat extends Component {
             }
         });
 
-        const _id = localStorage.getItem('_id');
+        this.socket.on('iamtyping', ({ sender, receiver, status }) => {
+            this.setState({
+                typing: {
+                    sender: sender,
+                    receiver: receiver,
+                    status: status
+                }
+            });
+        });
+
+        this.socket.on('user_left', _id => {
+            localStorage.removeItem('socketid');
+            const { activeIndex, userId, name, username, dp } = this.state.selectedUser;
+            this.setState({
+                selectedUser: {
+                    activeIndex: activeIndex,
+                    userId: userId,
+                    name: name,
+                    username: username,
+                    dp: dp,
+                    lastseen: moment()
+                }
+            })
+        });
+
         const token = localStorage.getItem('token');
         const httpHeaders = {
             'Authorization': `Bearer ${token}`
@@ -107,7 +148,28 @@ class Chat extends Component {
             });
     }
 
+    isUserTyping = (e) => {
+        let timeout;
+        const _id = localStorage.getItem('_id');
+        const { userId } = this.state.selectedUser;
+        if (e.which !== 13) {
+            this.socket.emit('typing', { sender: _id, receiver: userId, status: true });
+            clearTimeout(timeout);
+            timeout = setTimeout(this.typingTimeout, 1500)
+        } else {
+            clearTimeout(timeout);
+            this.typingTimeout();
+        }
+    }
+
+    typingTimeout = () => {
+        const _id = localStorage.getItem('_id');
+        const { userId } = this.state.selectedUser;
+        this.socket.emit('typing', { sender: _id, receiver: userId, status: false });
+    }
+
     isActive = (index, user) => {
+        console.log(user);
         if (user && user.userId) {
             this.setState({
                 selectedUser: {
@@ -127,7 +189,7 @@ class Chat extends Component {
                     name: `${user.sFirstName} ${user.sLastName}`,
                     username: user.sUsername,
                     dp: user.sImage,
-                    lastseen: user.createdAt
+                    lastseen: user.updatedAt
                 }
             });
         }
@@ -250,24 +312,43 @@ class Chat extends Component {
     }
 
     render() {
-        const { activeIndex, name, dp, lastseen } = this.state.selectedUser;
-        const { chat, messages, userList } = this.state;
+        const { activeIndex, userId, name, dp, lastseen } = this.state.selectedUser;
+        const { chat, messages, userList, online_users } = this.state;
+        const { sender, receiver, status } = this.state.typing;
+        const local_id = localStorage.getItem('_id');
         const users = (userList && userList.length > 0 ?
             userList.map((user, index) => {
                 const className = activeIndex === index ? 'active' : '';
-                return <ListGroupItem className={className} key={user._id} onClick={this.isActive.bind(this, index, user)}>
-                    <Row>
-                        <Col md="3">
-                            <span className="pull-left">
-                                <Media className="dp" src={user.sImage} />
-                            </span>
-                        </Col>
-                        <Col md="9">
-                            {`${user.sFirstName} ${user.sLastName}`}<br />
-                            <em style={{ color: "black" }}>{`@${user.sUsername}`}</em>
-                        </Col>
-                    </Row>
-                </ListGroupItem>
+                let isUserOnline = online_users.find((e) => e._id === user._id ? true : false);
+                return (isUserOnline ?
+                    <ListGroupItem className={className} key={user._id} onClick={this.isActive.bind(this, index, user)}>
+                        <Row>
+                            <Col md="3">
+                                <span className="pull-left">
+                                    <Media className="dp" src={user.sImage} />
+                                </span>
+                            </Col>
+                            <Col md="9">
+                                {`${user.sFirstName} ${user.sLastName}`}&nbsp;&nbsp;
+                                <span style={{ height: "10px", width: "10px", backgroundColor: '#00FF00', borderRadius: "50%", display: "inline-block" }}></span><br />
+                                <em style={{ color: "black" }}>{`@${user.sUsername}`}</em>
+                            </Col>
+                        </Row>
+                    </ListGroupItem> :
+                    <ListGroupItem className={className} key={user._id} onClick={this.isActive.bind(this, index, user)}>
+                        <Row>
+                            <Col md="3">
+                                <span className="pull-left">
+                                    <Media className="dp" src={user.sImage} />
+                                </span>
+                            </Col>
+                            <Col md="9">
+                                {`${user.sFirstName} ${user.sLastName}`}<br />
+                                <em style={{ color: "black" }}>{`@${user.sUsername}`}</em>
+                            </Col>
+                        </Row>
+                    </ListGroupItem>
+                )
             })
             :
             null
@@ -300,9 +381,34 @@ class Chat extends Component {
                                                     {name}
                                                 </Row>
                                                 <Row>
-                                                    {lastseen ?
-                                                        <small><em> {'last seen ' + moment(lastseen).fromNow()}</em></small>
-                                                        : <span className="m-auto" style={{ fontSize: "20px" }}>Click on user to start chat</span>}
+                                                    {activeIndex ?
+                                                        (online_users.find(e => e._id === userId ? true : false) ?
+                                                            (sender === userId && receiver === local_id && status === true ?
+                                                                <small><em>typing...</em></small>
+                                                                :
+                                                                <small><em>Online</em></small>
+                                                            ) :
+                                                            <small><em>{'last seen ' + moment(lastseen).fromNow()}</em></small>
+                                                        ) :
+                                                        (activeIndex ?
+                                                            (activeIndex >= 0 ?
+                                                                <small><em>{'last seen ' + moment(lastseen).fromNow()}</em></small>
+                                                                :
+                                                                <span className="m-auto" style={{ fontSize: "20px" }}>Click on user to start chat</span>
+                                                            ) :
+                                                            (activeIndex === 0 ?
+                                                                (online_users.find(e => e._id === userId ? true : false) ?
+                                                                    (sender === userId && receiver === local_id && status === true ?
+                                                                        <small><em>typing...</em></small>
+                                                                        :
+                                                                        <small><em>Online</em></small>
+                                                                    ) :
+                                                                    <small><em>{'last seen ' + moment(lastseen).fromNow()}</em></small>
+                                                                ) :
+                                                                <span className="m-auto" style={{ fontSize: "20px" }}>Click on user to start chat</span>
+                                                            )
+                                                        )
+                                                    }
                                                 </Row>
                                             </Container>
                                         </Col>
@@ -369,7 +475,7 @@ class Chat extends Component {
                                             </Col>
                                             <Col md="10">
                                                 <FormGroup style={{ paddingLeft: "25px" }}>
-                                                    <Input type="text" id="message" name="message" onChange={this.handleChange} value={chat.message} autoComplete="off" />
+                                                    <Input onKeyPress={this.isUserTyping} type="text" id="message" name="message" onChange={this.handleChange} value={chat.message} autoComplete="off" />
                                                     <FormFeedback></FormFeedback>
                                                 </FormGroup>
                                             </Col>

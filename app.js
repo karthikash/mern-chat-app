@@ -2,7 +2,7 @@
  * @author [Karthik Ashokkumar]
  * @email [karthikashokumar@gmail.com]
  * @create date 2020-12-24 19:13:21
- * @modify date 2020-12-24 19:28:21
+ * @modify date 2021-01-02 17:39:30
  * @desc [Chat application backend entry point]
  */
 
@@ -14,13 +14,12 @@ require('dotenv').config();
 const fs = require('fs');
 const http = require('http');
 const express = require('express');
-const socketio = require('socket.io');
-const { logger, constants, mongoConnection, appConfig } = require('./config');
+const { logger, constants, mongoConnection, appConfig, socketio } = require('./config');
 
 // app instance from express framework
 const app = express();
 const httpServer = http.createServer(app);
-const io = socketio(httpServer, { cors: { origin: constants.CLIENT } });
+const io = require('socket.io')(httpServer, { cors: { origin: constants.CLIENT } });
 
 const publicPath = './public';
 const uploadPath = './public/uploads';
@@ -33,20 +32,9 @@ if (!fs.existsSync(uploadPath)) {
     fs.mkdirSync(uploadPath);
 }
 
-io.on('connection', socket => {
-    logger.debug(`user connected: ${socket.id} `);
-    socket.emit('socket.id', socket.id);
-    socket.on('new_text_message', (message) => {
-        logger.debug(`new_text_message: ${JSON.stringify(message)}`);
-        io.emit('refresh_messages', message.oTo);
-    });
-    socket.on('receiver', res => {
-        logger.debug(`receiver ${res}`);
-    });
-});
-
 // global middleware for app instance
 appConfig(app);
+socketio(io);
 
 // establishing database connection
 mongoConnection((err) => {

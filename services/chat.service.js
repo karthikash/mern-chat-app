@@ -20,7 +20,7 @@ class ChatService {
         const { filename } = this.req.file;
         const user = await User.findOne({ _id: oFrom });
         if (!user) return this.res.status(404).json({ status: 404, message: 'user not found', error: 'Not Found' });
-        const imageUrl = `http://${constants.HOST}:${constants.PORT}/uploads/${filename}`;
+        const imageUrl = `${constants.HOST}/uploads/${filename}`;
         this.req.body.sMessage = imageUrl;
         const message = new Chat(this.req.body);
         message.save();
