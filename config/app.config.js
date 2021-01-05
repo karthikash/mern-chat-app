@@ -37,7 +37,7 @@ module.exports = (app) => {
     app.use(morgan(':date[Asia/Kolkata] - [ApiInfo] - info: :method - :url - :status - :res[content-length] - :response-time ms - :user-agent'));
 
     // CORS controllers
-    app.use(cors({ origin: '*', credentials: true }));
+    app.use(cors({ origin: true, credentials: true }));
     app.use((_req, res, next) => {
         res.header('Access-Control-Allow-Origin', '*');
         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
