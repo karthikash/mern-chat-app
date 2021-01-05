@@ -37,6 +37,7 @@ module.exports = (app) => {
     app.use(morgan(':date[Asia/Kolkata] - [ApiInfo] - info: :method - :url - :status - :res[content-length] - :response-time ms - :user-agent'));
 
     // CORS controllers
+    app.use(cors({ origin: '*', credentials: true }));
     app.use((_req, res, next) => {
         res.header('Access-Control-Allow-Origin', '*');
         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
@@ -44,8 +45,6 @@ module.exports = (app) => {
         res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
         next();
     });
-
-    app.use(cors({ origin: '*', credentials: true }));
 
     app.get('/health_check', (_req, res) => {
         return res.status(200).json({

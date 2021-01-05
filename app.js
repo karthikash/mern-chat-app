@@ -19,7 +19,7 @@ const { logger, constants, mongoConnection, appConfig, socketio } = require('./c
 // app instance from express framework
 const app = express();
 const httpServer = http.createServer(app);
-const io = require('socket.io')(httpServer, { cors: { origin: '*', methods: ["GET", "POST"] } });
+const io = require('socket.io')(httpServer, { cors: { origin: 'https://mern-chat-app.vercel.app', methods: ["GET", "POST"] } });
 
 const publicPath = './public';
 const uploadPath = './public/uploads';
