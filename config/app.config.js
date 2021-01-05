@@ -45,7 +45,7 @@ module.exports = (app) => {
         next();
     });
 
-    app.use(cors({ origin: true, credentials: true }));
+    app.use(cors({ origin: '*', credentials: true }));
 
     app.get('/health_check', (_req, res) => {
         return res.status(200).json({
