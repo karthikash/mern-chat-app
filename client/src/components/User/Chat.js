@@ -5,7 +5,7 @@ import $ from 'jquery';
 import moment from 'moment';
 import { io } from 'socket.io-client';
 
-const socket = io('http://localhost:3001');
+const socket = io(Constants.REACT_APP_SOCKET);
 
 class Chat extends Component {
 
