@@ -9,7 +9,7 @@ class Header extends Component {
         const _id = localStorage.getItem('_id');
         const token = localStorage.getItem('token');
         if (!_id || !token) return false;
-        const decoded = verify(token, Constants.REACT_APP_JWT_SECRET_KEY);
+        const decoded = verify(token, Constants.REACT_APP_JWT_SECRET_KEY, { ignoreExpiration: true });
         if (decoded._id === _id) {
             return true;
         } else {
