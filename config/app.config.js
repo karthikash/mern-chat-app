@@ -10,11 +10,14 @@ const routes = require('../routes');
 const constants = require('./constants.config');
 const { json, urlencoded, } = require('body-parser');
 const publicDirectoryPath = path.join(__dirname, '../public');
+const clientDirectoryPath = path.join(__dirname, '../client/build');
 
 module.exports = (app) => {
 
     // X-header protections
-    app.use(helmet());
+    app.use(helmet({
+        contentSecurityPolicy: false
+    }));
 
     // for parsing application/json
     app.use(json({
@@ -31,6 +34,7 @@ module.exports = (app) => {
 
     // for serving static files
     app.use(express.static(publicDirectoryPath));
+    app.use(express.static(clientDirectoryPath));
 
     // logs every request to the console
     morgan.token('date', () => { return moment().format('DD-MM-YYYY HH:mm:ss'); });
@@ -54,6 +58,10 @@ module.exports = (app) => {
     });
 
     app.use(`/${constants.API_VERSION}`, routes);
+
+    app.get('*',  (req, res) => {
+        res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
+    });
 
     app.use((_req, res, _next) => {
         var err = new Error('OOPS! Invalid Route');

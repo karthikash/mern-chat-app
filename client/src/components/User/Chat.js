@@ -1,11 +1,10 @@
 import { Component, createRef } from "react";
-import { Button, Card, CardBody, CardSubtitle, Col, Container, Form, FormFeedback, FormGroup, Input, ListGroup, ListGroupItem, Media, Row } from "reactstrap";
+import { Button, Card, CardBody, CardSubtitle, Col, Form, FormFeedback, FormGroup, Input, ListGroup, ListGroupItem, Media, Row } from "reactstrap";
 import { Constants } from '../../config';
 import $ from 'jquery';
 import moment from 'moment';
 import { io } from 'socket.io-client';
-
-const socket = io(Constants.REACT_APP_SOCKET);
+import * as imageConversion from 'image-conversion';
 
 class Chat extends Component {
 
@@ -14,12 +13,15 @@ class Chat extends Component {
 
         this.state = this.getInitialState();
         this.messagesEnd = createRef();
-        this.socket = socket;
+        this.socket = io.connect('http://localhost:3001', {
+            origin: '*',
+            path: '/socket.io',
+            transports: ['websocket']
+        });
     }
 
     componentDidUpdate() {
         this.autoscroll();
-        //this.messagesEnd.scrollIntoView({ behavior: "auto" });
     }
 
     autoscroll = () => {
@@ -54,7 +56,9 @@ class Chat extends Component {
             sender: '',
             receiver: '',
             status: ''
-        }
+        },
+        back: false,
+        matches: window.matchMedia("(min-width: 992px)").matches
     });
 
     handleChange = (e) => {
@@ -77,6 +81,9 @@ class Chat extends Component {
     componentDidMount() {
         this.autoscroll();
 
+        const handler = e => this.setState({ matches: e.matches });
+        window.matchMedia("(min-width: 992px)").addEventListener('change', handler);
+
         const _id = localStorage.getItem('_id');
 
         this.socket.on('socket.id', (socketid) => {
@@ -85,14 +92,10 @@ class Chat extends Component {
         });
 
         this.socket.on('users_online', (data) => {
-            console.log('users_online: ', data);
-            this.setState({
-                online_users: data
-            });
+            this.setState({ online_users: data });
         });
 
         this.socket.on('refresh_messages', receiverId => {
-            console.log(receiverId);
             const _id = localStorage.getItem('_id');
             const { selectedUser } = this.state;
             if (_id === receiverId) {
@@ -144,7 +147,7 @@ class Chat extends Component {
                 });
             })
             .catch(error => {
-                console.log(error);
+                console.error(error);
             });
     }
 
@@ -168,8 +171,8 @@ class Chat extends Component {
         this.socket.emit('typing', { sender: _id, receiver: userId, status: false });
     }
 
-    isActive = (index, user) => {
-        console.log(user);
+    isActive = async (index, user) => {
+        $('.chat-box').show();
         if (user && user.userId) {
             this.setState({
                 selectedUser: {
@@ -179,7 +182,8 @@ class Chat extends Component {
                     username: user.username,
                     dp: user.dp,
                     lastseen: user.lastseen
-                }
+                },
+                back: false
             });
         } else {
             this.setState({
@@ -190,112 +194,49 @@ class Chat extends Component {
                     username: user.sUsername,
                     dp: user.sImage,
                     lastseen: user.updatedAt
-                }
+                },
+                back: false
             });
         }
         const userId = localStorage.getItem('_id');
-        const token = localStorage.getItem('token');
         const receiver = user._id || user.userId;
-        const httpHeaders = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json;charset=UTF-8',
-            'Authorization': `Bearer ${token}`
-        };
-        const options = {
-            method: 'GET',
-            headers: new Headers(httpHeaders)
-        };
-        fetch(`${Constants.REACT_APP_API_BASE_URL}/chat/list?sender=${userId}&receiver=${receiver}`, options)
-            .then(async (success) => {
-                const json = await success.json();
-                this.setState({
-                    messages: json.data
-                });
-            })
-            .catch((error) => {
-                console.log('error: ', error);
-            });
+        this.socket.emit('req_messages', { sender: userId, receiver });
+        this.socket.on('messages', (data) => {
+            this.setState({ messages: data });
+        });
     }
 
     uploadButton = () => {
         $('input[type=file]').trigger('click');
     }
 
-    sendMessage = (e) => {
+    getBase64 = (file) => new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = function () {
+            resolve(reader.result);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    sendMessage = async (e) => {
         e.preventDefault();
         const { chat, selectedUser, files } = this.state;
         const userId = localStorage.getItem('_id');
-        const token = localStorage.getItem('token');
         if (files && files.media) {
-            const data = new FormData();
-            data.append('oFrom', userId);
-            data.append('oTo', selectedUser.userId);
-            data.append('media', files.media);
-            const httpHeaders = {
-                'Authorization': `Bearer ${token}`
-            }
-            const options = {
-                method: 'POST',
-                headers: new Headers(httpHeaders),
-                body: data
-            };
-            fetch(`${Constants.REACT_APP_API_BASE_URL}/chat/upload`, options)
-                .then((success) => {
-                    this.setState({
-                        selectedUser: {
-                            activeIndex: selectedUser.activeIndex,
-                            userId: selectedUser.userId,
-                            name: selectedUser.name,
-                            username: selectedUser.username,
-                            dp: selectedUser.dp,
-                            lastseen: selectedUser.lastseen
-                        },
-                        files: {
-                            media: ''
-                        }
-                    });
-                    this.isActive(selectedUser.activeIndex, selectedUser);
-                    this.socket.emit('new_text_message', {
-                        sMessage: chat.message,
-                        oFrom: userId,
-                        oTo: selectedUser.userId
-                    });
-                })
-                .catch((error) => {
-                    console.log('error: ', error);
-                });
+            const file = await imageConversion.compress(files.media, 0.8);
+            const base64 = await this.getBase64(file);
+            this.setState({ chat: { message: '' } });
+            this.isActive(selectedUser.activeIndex, selectedUser);
+            this.socket.emit('new_media_message', {
+                oFrom: userId,
+                oTo: selectedUser.userId,
+                fileName: files.media.name,
+                file: base64
+            });
         } else {
-            const httpHeaders = {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json;charset=UTF-8',
-                'Authorization': `Bearer ${token}`
-            }
-            const options = {
-                method: 'POST',
-                headers: new Headers(httpHeaders),
-                body: JSON.stringify({
-                    sMessage: chat.message,
-                    oFrom: userId,
-                    oTo: selectedUser.userId
-                })
-            };
-            fetch(`${Constants.REACT_APP_API_BASE_URL}/chat/send`, options)
-                .then(async (success) => {
-                    this.setState({
-                        chat: {
-                            message: ''
-                        }
-                    });
-                    this.isActive(selectedUser.activeIndex, selectedUser);
-                    this.socket.emit('new_text_message', {
-                        sMessage: chat.message,
-                        oFrom: userId,
-                        oTo: selectedUser.userId
-                    });
-                })
-                .catch((error) => {
-                    console.log('error: ', error);
-                });
+            this.setState({ chat: { message: '' } });
+            this.isActive(selectedUser.activeIndex, selectedUser);
+            this.socket.emit('new_text_message', { sMessage: chat.message, oFrom: userId, oTo: selectedUser.userId });
         }
     }
 
@@ -311,9 +252,24 @@ class Chat extends Component {
         }
     }
 
+    handleBackButton = () => {
+        this.setState({
+            back: true,
+            selectedUser: {
+                activeIndex: null,
+                userId: '',
+                name: '',
+                username: '',
+                dp: '',
+                lastseen: ''
+            }
+        });
+        $('.chat-box').hide();
+    }
+
     render() {
         const { activeIndex, userId, name, dp, lastseen } = this.state.selectedUser;
-        const { chat, messages, userList, online_users } = this.state;
+        const { chat, messages, userList, online_users, matches, back, selectedUser } = this.state;
         const { sender, receiver, status } = this.state.typing;
         const local_id = localStorage.getItem('_id');
         const users = (userList && userList.length > 0 ?
@@ -323,28 +279,28 @@ class Chat extends Component {
                 return (isUserOnline ?
                     <ListGroupItem className={className} key={user._id} onClick={this.isActive.bind(this, index, user)}>
                         <Row>
-                            <Col md="3">
+                            <Col md="3" sm="3" xs="3">
                                 <span className="pull-left">
                                     <Media className="dp" src={user.sImage} />
                                 </span>
                             </Col>
-                            <Col md="9">
+                            <Col md="9" sm="9" xs="9">
                                 {`${user.sFirstName} ${user.sLastName}`}&nbsp;&nbsp;
                                 <span style={{ height: "10px", width: "10px", backgroundColor: '#00FF00', borderRadius: "50%", display: "inline-block" }}></span><br />
-                                <em style={{ color: "black" }}>{`@${user.sUsername}`}</em>
+                                <em style={className === 'active' ? { color: "white" } : { color: "black" }}>{`@${user.sUsername}`}</em>
                             </Col>
                         </Row>
                     </ListGroupItem> :
                     <ListGroupItem className={className} key={user._id} onClick={this.isActive.bind(this, index, user)}>
                         <Row>
-                            <Col md="3">
+                            <Col md="3" sm="3" xs="3">
                                 <span className="pull-left">
                                     <Media className="dp" src={user.sImage} />
                                 </span>
                             </Col>
-                            <Col md="9">
+                            <Col md="9" sm="9" xs="9">
                                 {`${user.sFirstName} ${user.sLastName}`}<br />
-                                <em style={{ color: "black" }}>{`@${user.sUsername}`}</em>
+                                <em style={className === 'active' ? { color: "white" } : { color: "black" }}>{`@${user.sUsername}`}</em>
                             </Col>
                         </Row>
                     </ListGroupItem>
@@ -356,65 +312,85 @@ class Chat extends Component {
         return (
             <div>
                 <Row>
-                    <Col md="4">
-                        <Card className="chat-card">
-                            <CardBody>
-                                <CardSubtitle tag="h5" className="mb-2 text-muted">Users</CardSubtitle>
-                                <br />
-                                <ListGroup className="scroll">{users ? users : null}</ListGroup>
-                            </CardBody>
-                        </Card>
-                    </Col>
-                    <Col md="8">
+                    {matches &&
+                        <Col md="4">
+                            <Card className="chat-card">
+                                <CardBody>
+                                    <CardSubtitle tag="h6" className="mb-2 text-muted">Users</CardSubtitle>
+                                    <br />
+                                    <ListGroup className="scroll">{users ? users : null}</ListGroup>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    }
+                    {!matches && back &&
+                        <Col md="4">
+                            <Card className="chat-card">
+                                <CardBody>
+                                    <CardSubtitle tag="h6" className="mb-2 text-muted">Users</CardSubtitle>
+                                    <br />
+                                    <ListGroup className="scroll">{users ? users : null}</ListGroup>
+                                </CardBody>
+                            </Card>
+                        </Col>
+                    }
+                    <Col className="chat-box" md="8" sm="12" xs="12">
                         <Card className="chat-card">
                             <CardBody>
                                 <CardSubtitle className="text-muted">
                                     <Row>
-                                        <Col md="1">
-                                            <span className="pull-left">
+                                        {!matches &&
+                                            <Col sm="3" xs="3" className="pull-left">
+                                                <FormGroup>
+                                                    <Button style={{ color: '#147EFB', backgroundColor: 'white', border: 'none' }} onClick={this.handleBackButton}>
+                                                        <i className="fa fa-chevron-left" aria-hidden="true" ></i>
+                                                    </Button>
+                                                </FormGroup>
+                                            </Col>
+                                        }
+                                        <Col md="2" sm="2" xs="2">
+                                            <span className="pull-right">
                                                 <Media className="dp" src={dp} />
                                             </span>
                                         </Col>
-                                        <Col md="11" className="pull-left">
-                                            <Container>
-                                                <Row>
-                                                    {name}
-                                                </Row>
-                                                <Row>
-                                                    {activeIndex ?
-                                                        (online_users.find(e => e._id === userId ? true : false) ?
-                                                            (sender === userId && receiver === local_id && status === true ?
-                                                                <small><em>typing...</em></small>
-                                                                :
-                                                                <small><em>Online</em></small>
-                                                            ) :
-                                                            <small><em>{'last seen ' + moment(lastseen).fromNow()}</em></small>
+                                        <Col md="10" sm="7" xs="7" className="pull-left">
+                                            <Row>
+                                                {name}
+                                            </Row>
+                                            <Row>
+                                                {activeIndex ?
+                                                    (online_users.find(e => e._id === userId ? true : false) ?
+                                                        (sender === userId && receiver === local_id && status === true ?
+                                                            <small><em>typing...</em></small>
+                                                            :
+                                                            <small><em>Online</em></small>
                                                         ) :
-                                                        (activeIndex ?
-                                                            (activeIndex >= 0 ?
-                                                                <small><em>{'last seen ' + moment(lastseen).fromNow()}</em></small>
-                                                                :
-                                                                <span className="m-auto" style={{ fontSize: "20px" }}>Click on user to start chat</span>
-                                                            ) :
-                                                            (activeIndex === 0 ?
-                                                                (online_users.find(e => e._id === userId ? true : false) ?
-                                                                    (sender === userId && receiver === local_id && status === true ?
-                                                                        <small><em>typing...</em></small>
-                                                                        :
-                                                                        <small><em>Online</em></small>
-                                                                    ) :
-                                                                    <small><em>{'last seen ' + moment(lastseen).fromNow()}</em></small>
+                                                        <small><em>{'last seen ' + moment(lastseen).fromNow()}</em></small>
+                                                    ) :
+                                                    (activeIndex ?
+                                                        (activeIndex >= 0 ?
+                                                            <small><em>{'last seen ' + moment(lastseen).fromNow()}</em></small>
+                                                            :
+                                                            <span className="m-auto" style={{ fontSize: "20px" }}>{selectedUser.name}</span>
+                                                        ) :
+                                                        (activeIndex === 0 ?
+                                                            (online_users.find(e => e._id === userId ? true : false) ?
+                                                                (sender === userId && receiver === local_id && status === true ?
+                                                                    <small><em>typing...</em></small>
+                                                                    :
+                                                                    <small><em>Online</em></small>
                                                                 ) :
-                                                                <span className="m-auto" style={{ fontSize: "20px" }}>Click on user to start chat</span>
-                                                            )
+                                                                <small><em>{'last seen ' + moment(lastseen).fromNow()}</em></small>
+                                                            ) :
+                                                            null
                                                         )
-                                                    }
-                                                </Row>
-                                            </Container>
+                                                    )
+                                                }
+                                                {!activeIndex && <div></div>}
+                                            </Row>
                                         </Col>
                                     </Row>
                                 </CardSubtitle>
-                                <hr />
                                 <ListGroup className="scroll" style={{ paddingBottom: "60px" }}>
                                     {messages && messages.length > 0 ?
                                         messages.map((message, index) => {
@@ -431,7 +407,7 @@ class Chat extends Component {
                                                                     <img src={message.sMessage} height="100%" width="100%" alt="" style={{ borderRadius: "10px", padding: "8px" }}></img>
                                                                 )
                                                                 :
-                                                                <span style={{ backgroundColor: "#f7f7f7", borderColor: "#292b2c", borderRadius: "40px", padding: "8px" }}>
+                                                                <span style={{ color: '#FFFFFF', backgroundColor: "#147EFB", borderColor: "#292B2C", borderRadius: "40px", padding: "8px" }}>
                                                                     {message.sMessage}
                                                                 </span>
                                                             }
@@ -448,7 +424,7 @@ class Chat extends Component {
                                                                     <img src={message.sMessage} height="100%" width="100%" alt="" style={{ borderRadius: "10px", padding: "8px" }}></img>
                                                                 )
                                                                 :
-                                                                <span style={{ backgroundColor: "#f7f7f7", borderColor: "#292b2c", borderRadius: "40px", padding: "8px" }}>
+                                                                <span style={{ backgroundColor: "#F7F7F7", borderColor: "#292B2C", borderRadius: "40px", padding: "8px" }}>
                                                                     {message.sMessage}
                                                                 </span>
                                                             }
@@ -463,25 +439,25 @@ class Chat extends Component {
                                     <div ref={el => { this.messagesEnd = el; }} style={{ float: "left", clear: "both" }} > </div>
                                 </ListGroup>
                                 {activeIndex === 0 || activeIndex >= 1 ?
-                                    <Form className="chat-form" onSubmit={this.sendMessage}>
+                                    <Form className="chat-form" style={{ borderTop: 'solid', borderColor: '#BDBDBD', borderWidth: '0.5px' }} onSubmit={this.sendMessage}>
                                         <Row>
-                                            <Col md="1">
+                                            <Col md="1" sm="2" xs="2">
                                                 <FormGroup>
-                                                    <Button onClick={this.uploadButton}>
+                                                    <Button style={{ backgroundColor: '#BDBDBD', border: 'none', borderRadius: "50px" }} onClick={this.uploadButton}>
                                                         <i className="fa fa-camera" aria-hidden="true"></i>
                                                     </Button>
                                                     <Input type="file" id="media" name="media" accept="image/*, video/*" style={{ display: "none" }} onChange={this.handleChange} />
                                                 </FormGroup>
                                             </Col>
-                                            <Col md="10">
-                                                <FormGroup style={{ paddingLeft: "25px" }}>
+                                            <Col md="10" sm="8" xs="8">
+                                                <FormGroup style={{ paddingLeft: "10px" }}>
                                                     <Input onKeyPress={this.isUserTyping} type="text" id="message" name="message" onChange={this.handleChange} value={chat.message} autoComplete="off" />
                                                     <FormFeedback></FormFeedback>
                                                 </FormGroup>
                                             </Col>
-                                            <Col md="1">
+                                            <Col md="1" sm="2" xs="2">
                                                 <FormGroup>
-                                                    <Button color="primary" disabled={!this.isMessageTyped()}>
+                                                    <Button style={{ backgroundColor: '#147EFB', border: 'none', borderRadius: "50px" }} disabled={!this.isMessageTyped()}>
                                                         <i className="fa fa-paper-plane" aria-hidden="true" ></i>
                                                     </Button>
                                                 </FormGroup>

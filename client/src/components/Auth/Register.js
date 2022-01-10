@@ -47,6 +47,8 @@ class Register extends Component {
         if (data.sFirstName === '') errors.sFirstName = 'First name cannot be empty.';
         if (!isAlpha(data.sLastName)) errors.sLastName = 'Last name must only contain alphabets.';
         if (data.sLastName === '') errors.sLastName = 'Last name cannot be empty.';
+        if (data.sFirstName.length < 3) errors.sFirstName = 'First Name must be atleast 3 characters.';
+        if (data.sLastName.length < 3) errors.sLastName = 'Last Name must be atleast 3 characters.';
         if (data.sUsername === '') errors.sUsername = 'Username cannot be empty.';
         if (data.sPassword.length < 8) errors.sPassword = 'Password must be atleast 8 characters.'
         if (data.sPassword === '') errors.sPassword = 'Password cannot be empty.';

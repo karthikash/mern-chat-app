@@ -1,15 +1,13 @@
 const mongoose = require('mongoose');
 
-const { MONGO_CONFIG, MONGO_DB_URL } = require('./constants.config');
+const { MONGO_DB_URL } = require('./constants.config');
 
 module.exports = (cb) => {
     const options = {
-        keepAlive: 300000,
+        keepAlive: true,
         connectTimeoutMS: 30000,
         useNewUrlParser: true,
-        useUnifiedTopology: true,
-        useCreateIndex: true,
-        useFindAndModify: false
+        useUnifiedTopology: true
     };
     //const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = MONGO_CONFIG;
     mongoose.connection.openUri(MONGO_DB_URL, options, (err) => {

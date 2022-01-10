@@ -2,7 +2,7 @@
  * @author [Karthik Ashokkumar]
  * @email [karthikashokumar@gmail.com]
  * @create date 2020-12-24 19:13:21
- * @modify date 2021-01-02 17:39:30
+ * @modify date 2022-01-10 11:13:11
  * @desc [Chat application backend entry point]
  */
 
@@ -16,10 +16,15 @@ const http = require('http');
 const express = require('express');
 const { logger, constants, mongoConnection, appConfig, socketio } = require('./config');
 
-// app instance from express framework
+/**
+ * app instance from express framework
+ * global middleware for app instance
+ */
 const app = express();
+appConfig(app);
 const httpServer = http.createServer(app);
 const io = require('socket.io')(httpServer, { cors: { origin: '*' } });
+socketio(io);
 
 const publicPath = './public';
 const uploadPath = './public/uploads';
@@ -32,9 +37,6 @@ if (!fs.existsSync(uploadPath)) {
     fs.mkdirSync(uploadPath);
 }
 
-// global middleware for app instance
-appConfig(app);
-socketio(io);
 
 // establishing database connection
 mongoConnection((err) => {

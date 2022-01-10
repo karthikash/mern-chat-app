@@ -1,6 +1,8 @@
 const logger = require("./logger.config");
 const { User } = require('../models');
 const moment = require('moment');
+const { Chat } = require('../models');
+const fs = require('fs');
 
 module.exports = (io) => {
     const users = [];
@@ -31,8 +33,42 @@ module.exports = (io) => {
             io.emit('users_online', users);
         });
 
-        socket.on('new_text_message', (message) => {
+        socket.on('req_messages', async (data) => {
+            const { sender, receiver } = data;
+            logger.debug(`sender ${sender} requesting updated messages for receiver ${receiver}`);
+            const messages = await Chat
+                .find({}, { _id: 1, sMessage: 1, nStatus: 1, createdAt: 1 })
+                .or([{ oFrom: sender, oTo: receiver }, { oFrom: receiver, oTo: sender }])
+                .select('oFrom')
+                .populate({ path: 'oFrom', model: User, select: { sFirstName: 1 } })
+                .select('oTo')
+                .populate({ path: 'oTo', model: User, select: { sFirstName: 1 } })
+                .sort({ createdAt: 1 });
+            io.emit('messages', messages);
+            logger.debug(`updated chat emitted`);
+        });
+
+        socket.on('new_media_message', (message) => {
+            let fileName = `${message.oFrom}-${Date.now()}-${message.fileName}`;
+            message.file = message.file.replace(/^data:image\/\w+;base64,/, '');
+            fs.writeFile(`./public/uploads/${fileName}`, message.file, 'base64', async (error) => {
+                if (error) {
+                    logger.error(`error while saving file: ${error.message}`);
+                } else {
+                    const msg = {
+                        sMessage: `${constants.HOST}/uploads/${fileName}`,
+                        oFrom: message.oFrom,
+                        oTo: message.oTo
+                    };
+                    await new Chat(msg).save();
+                }
+            });
+            io.emit('refresh_messages', message.oTo);
+        });
+
+        socket.on('new_text_message', async (message) => {
             logger.debug(`new_text_message: ${JSON.stringify(message)}`);
+            await new Chat(message).save();
             io.emit('refresh_messages', message.oTo);
         });
 

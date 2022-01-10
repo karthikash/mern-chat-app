@@ -56,7 +56,6 @@ class Login extends Component {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json;charset=UTF-8'
                 },
-                credentials: 'include',
                 body: JSON.stringify(data)
             };
             fetch(`${Constants.REACT_APP_API_BASE_URL}/auth/signin`, options)
@@ -67,7 +66,7 @@ class Login extends Component {
                         localStorage.setItem('_id', response._id);
                         localStorage.setItem('token', response.token);
                         localStorage.setItem('dp', response.sImage);
-                        return window.location.assign('/chat');
+                        return window.location.assign('/');
                     }
                 })
                 .catch((error) => {

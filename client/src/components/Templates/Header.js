@@ -1,5 +1,5 @@
 import { Component } from "react"
-import { DropdownItem, DropdownMenu, DropdownToggle, Media, Nav, Navbar, NavbarBrand, NavItem, UncontrolledDropdown } from "reactstrap";
+import { DropdownItem, DropdownMenu, DropdownToggle, Media, Nav, Navbar, NavbarBrand, UncontrolledDropdown } from "reactstrap";
 import { verify } from 'jsonwebtoken';
 import { Constants } from '../../config';
 
@@ -68,8 +68,8 @@ class Header extends Component {
         if (!this.isAuth()) {
             return (
                 <div>
-                    <Navbar color="faded" light expand="md">
-                        <NavbarBrand href="/chat">Mern Chat App</NavbarBrand>
+                    <Navbar className="justify-content-center" color="faded" light expand="md">
+                        <NavbarBrand>Chat App</NavbarBrand>
                     </Navbar>
                 </div>
             )
@@ -78,10 +78,12 @@ class Header extends Component {
             return (
                 <div>
                     <Navbar color="faded" light expand="md">
-                        <NavbarBrand href="/chat">Mern Chat App</NavbarBrand>
+                        <NavbarBrand href="/">Chats</NavbarBrand>
                         <Nav className="ml-auto" navbar>
                             <UncontrolledDropdown nav inNavbar>
-                                <DropdownToggle nav caret>Account</DropdownToggle>
+                                <DropdownToggle nav>
+                                    <Media className="dp" src={sImage} alt="Name" />
+                                </DropdownToggle>
                                 <DropdownMenu right>
                                     <DropdownItem href="/profile">  Profile </DropdownItem>
                                     <DropdownItem onClick={this.logout}> Logout </DropdownItem>
@@ -90,9 +92,6 @@ class Header extends Component {
                                     <DropdownItem onClick={this.deactivateAccount}>  Deactivate Account   </DropdownItem>
                                 </DropdownMenu>
                             </UncontrolledDropdown>
-                            <NavItem>
-                                <Media className="dp" src={sImage} alt="Name" />
-                            </NavItem>
                         </Nav>
                     </Navbar>
                 </div>

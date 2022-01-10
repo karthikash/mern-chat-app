@@ -47,9 +47,9 @@ class App extends Component {
 					</Row>
 					<Router>
 						<Switch>
-							<Route to="/chat" component={Chat} />
-							<Route to="/profile" component={Profile} />
-							<Route to="/reset" component={ResetPassword} />
+							<Route exact path="/" component={Chat} />
+                            <Route exact path="/profile" component={Profile} />
+							<Route exact path="/reset" component={ResetPassword} />
 						</Switch>
 					</Router>
 					<Row>

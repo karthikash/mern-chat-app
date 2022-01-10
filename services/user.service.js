@@ -24,7 +24,7 @@ class UserService {
         } else {
             users = await User.find({}, { __v: 0, sPassword: 0, sSalt: 0 }).sort({ sFirstName: 1 });
         }
-        if (users.length === 0) return this.res.status(404).json({ status: 404, message: 'user list empty', error: 'Not Found' });
+        if (!users.length) return this.res.status(404).json({ status: 404, message: 'user list empty', error: 'Not Found' });
         return this.res.status(200).json({ status: 200, message: 'user details', data: users });
     }
 

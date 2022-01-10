@@ -27,7 +27,8 @@ const User = new Schema({
         type: String
     },
     sImage: {
-        type: String
+        type: String,
+        default: 'avatar.png'
     },
     dLastSeen: {
         type: Date

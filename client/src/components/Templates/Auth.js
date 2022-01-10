@@ -20,7 +20,7 @@ class Auth extends Component {
 
     render() {
         return (
-            <Row className="justify-content-md-center">
+            <Row className="justify-content-center">
                 <div>
                     <Nav tabs>
                         <NavItem>
