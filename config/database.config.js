@@ -10,7 +10,7 @@ module.exports = (cb) => {
         useUnifiedTopology: true
     };
     const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = MONGO_CONFIG;
-    mongoose.connection.openUri(`mongodb+srv://${DB_USER}:<${DB_PASSWORD}ord>@${DB_HOST}/${DB_NAME}?retryWrites=true&w=majority`, options, (err) => {
+    mongoose.connection.openUri(`mongodb+srv://${DB_USER}:<${DB_PASSWORD}>@${DB_HOST}/${DB_NAME}?retryWrites=true&w=majority`, options, (err) => {
         if (err) {
             cb(err);
         }
