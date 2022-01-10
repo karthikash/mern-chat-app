@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const { MONGO_DB_URL } = require('./constants.config');
+const { MONGO_CONFIG, MONGO_DB_URL } = require('./constants.config');
 
 module.exports = (cb) => {
     const options = {
@@ -9,8 +9,8 @@ module.exports = (cb) => {
         useNewUrlParser: true,
         useUnifiedTopology: true
     };
-    //const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = MONGO_CONFIG;
-    mongoose.connection.openUri(MONGO_DB_URL, options, (err) => {
+    const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME } = MONGO_CONFIG;
+    mongoose.connection.openUri(`mongodb+srv://${DB_USER}:<${DB_PASSWORD}ord>@${DB_HOST}/${DB_NAME}?retryWrites=true&w=majority`, options, (err) => {
         if (err) {
             cb(err);
         }
